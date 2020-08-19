@@ -1,23 +1,18 @@
 const ProductModel = require('../../models/ProductModel');
 
-// exports.getProducts = (req, res, next) => {
-//     ProductModel.fetchProducts(prods => {
-//         res.render('ejs-templates/admin/products', {
-//             pageTitle: "Admin Products",
-//             path: '/admin/products',
-//             products: prods
-//         });
-//     });
-// };
-
 exports.getProducts = (req, res, next) => {
-    ProductModel.fetchProducts(products => {
-        res.render('ejs-templates/admin/products', {
-            prods: products,
-            pageTitle: "Products List",
-            path: '/admin/products'
-        })
-    });
+    ProductModel.fetchProducts()
+        .then(result => {
+            // console.log(result);
+            const products = result[0];
+            return res.render('ejs-templates/admin/products', {
+                prods: products,
+                pageTitle: "Products List",
+                path: '/admin/products'
+            });
+        }).catch(err => {
+            console.log(err);
+        });
 };
 
 exports.getAddProductPage = (req, res, next) => {
@@ -33,8 +28,11 @@ exports.postStoreProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
     const product = new ProductModel(null, title, image, price, description);
-    product.save(() => {
-        res.redirect('/admin/products');
+    product.save().then(result => {
+        // console.log(result);
+        return res.status(200).redirect('/admin/products');
+    }).catch(err => {
+        console.log(err);
     });
 };
 
@@ -47,15 +45,19 @@ exports.getEditProductPage = (req, res, next) => {
     if (!id) {
         return res.status(404).redirect('/admin/products');
     }
-    ProductModel.getProduct(id, (product) => {
-        if (!product) {
+    ProductModel.getProduct(id).then(result => {
+        console.log(result);
+        const _product = result[0][0];
+        if (!_product) {
             return res.status(404).redirect('/admin/products');
         }
-        res.render('ejs-templates/admin/edit-product', {
+        return res.render('ejs-templates/admin/edit-product', {
             pageTitle: "Edit Product",
             path: '/admin/edit-product',
-            product: product
-        })
+            product: _product
+        });
+    }).catch(err => {
+        console.log(err);
     });
 };
 
@@ -66,19 +68,20 @@ exports.postUpdateProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
     const product = new ProductModel(id, title, image, price, description);
-    product.save(() => {
-        res.redirect('/admin/products');
+    product.update().then(result => {
+        // console.log(result);
+        return res.status(200).redirect('/admin/products');
+    }).catch(err => {
+        console.log(err);
     });
 };
 
 exports.deleteProduct = (req, res, next) => {
     const id = req.body.productID;
-    ProductModel.deleteProduct(id, (result) => { // result will be true, false
-        if (result) {
-            res.redirect('/admin/products');
-        } else {
-            console.log("error occured while deleting product");
-            res.redirect('/admin/products');
-        }
+    ProductModel.deleteProduct(id).then(result => {
+        // console.log(result);
+        return res.status(200).redirect('/admin/products');
+    }).catch(err => {
+        console.log(err);
     });
 };
