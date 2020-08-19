@@ -1,0 +1,18 @@
+<%- include('./../../includes/header.ejs') %>
+<main class="text-center mt-5">
+    <div class="container">
+        <% if(prods.length > 0) { %>
+        <div class="row">
+            <%- include('./../../includes/product-list.ejs') %>
+        </div>
+        <% } else { %>
+        <div class="row">
+            <div class="col-12">
+                <h1 class="display-4">No Product Found!</h1>
+                <p>Products will list here...</p>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</main>
+<%- include('./../../includes/footer.ejs') %>

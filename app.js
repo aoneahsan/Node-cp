@@ -9,9 +9,9 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 // Custom Imports
-// const _routes = require('./routes'); // before using Express core node
-const adminData = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const systemController = require('./controllers/SystemController');
 
 // *****************************************
 // All Imports Ends
@@ -28,22 +28,10 @@ const expressApp = express();
 // **********************************************************************************
 // including static files (style, scripts, images) files.
 expressApp.use(express.static(path.join(__dirname, 'public')));
+// expressApp.use(express.static(path.join(__dirname, 'data')));
 
 // **********************************************************************************
 // defining defualt template engine
-// 1 - PUG
-// expressApp.set('view engine', 'pug');
-
-// 2 - handlebars
-// const expressHBS = require('express-handlebars');
-// expressApp.engine('hbs', expressHBS({
-//     layoutDir: 'views/layouts/',
-//     defualtLayout: 'main',
-//     extname: 'hbs'
-// }));
-// expressApp.set('view engine', 'hbs');
-
-// 3 - eje
 expressApp.set('view engine', 'ejs');
 expressApp.set('views', 'views');
 
@@ -53,22 +41,9 @@ expressApp.use(bodyParser.urlencoded({ extended: false })); // this will make al
 
 // **********************************************************************************
 // Adding app routes
-expressApp.use(adminData.routes);
+expressApp.use('/admin',adminRoutes);
 expressApp.use(shopRoutes);
-expressApp.use((req, res, next) => {
-    // res.status(404).render('pug-templates/404', {
-    //     pageTitle: "404 | Not Found",
-    //     path: '/404'
-    // });
-    // res.status(404).render('handlebars-templates/404', {
-    //     pageTitle: "404 | Not Found",
-    //     path: '/404'
-    // });
-    res.status(404).render('ejs-templates/404', {
-        pageTitle: "404 | Not Found",
-        path: '/404'
-    });
-});
+expressApp.use(systemController.getPageNotFound);
 
 // **********************************************************************************
 // starting server

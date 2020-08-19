@@ -1,38 +1,28 @@
 // Imports
 const express = require('express');
-const path = require('path');
 
-// Root Path Import
-const rootPath = require('./../utils/root-path');
-
-// Admin Data Import
-const adminData = require('./admin');
+const shopController = require('../controllers/shop/ShopController');
 
 // Code
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
-    const products = adminData.products;
-    // res.sendFile(path.join(rootPath, 'views', 'shop.html'));
-    // res.render('pug-templates/shop', {
-    //     prods: products,
-    //     pageTitle: "Shop Page",
-    //     path: '/shop'
-    // });
-    // res.render('handlebars-templates/shop', {
-    //     prods: products,
-    //     pageTitle: "Shop Page",
-    //     path: '/shop',
-    //     shopPage: true,
-    //     haveProducts: products.length > 0
-    // });
-    console.log("Shop.js == products = ", products);
-    res.render('ejs-templates/shop', {
-        prods: products,
-        pageTitle: "Shop Page",
-        shopPage: true,
-        path: '/shop'
-    });
-});
+router.get('/', shopController.getIndex);
+
+router.get('/product-list', shopController.getProducts);
+
+router.get('/product-list/:productID', shopController.getProductDetail);
+
+router.get('/orders', shopController.getOrders);
+
+router.get('/cart', shopController.getCart);
+
+router.post('/cart', shopController.postCart);
+
+router.get('/checkout', shopController.getCheckout);
+
+router.get('/product-list/1', shopController.getProductDetail);
+
+router.post('/cart-remove-item', shopController.removeCartItem);
+
 
 module.exports = router;

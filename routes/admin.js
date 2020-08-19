@@ -1,40 +1,21 @@
 // Imports
 const express = require('express');
-const path = require('path');
 
-const rootPath = require('./../utils/root-path');
-
+const adminController = require('./../controllers/admin/AdminController');
 
 // Code
 const router = express.Router();
 
-const prods = [];
+router.get('/products', adminController.getProducts);
 
-router.get('/add-product', (req, res, next) => {
-    // res.render('pug-templates/add-product', {
-    //     pageTitle: "Add Product",
-    //     path: '/add-product'
-    // });
-    // res.render('handlebars-templates/add-product', {
-    //     pageTitle: "Add Product",
-    //     path: '/add-product',
-    //     addProductPage: true
-    // });
-    res.render('ejs-templates/add-product', {
-        pageTitle: "Add Product",
-        path: '/add-product',
-        path: '/add-product'
-    });
-});
+router.get('/add-product', adminController.getAddProductPage);
 
-router.post('/add-product', (req, res, next) => {
-    prods.push(
-        {
-            title: req.body.title
-        }
-    );
-    res.redirect('/');
-});
+router.post('/add-product', adminController.postStoreProduct);
 
-module.exports.routes = router;
-module.exports.products = prods;
+router.get('/edit-product/:productID', adminController.getEditProductPage);
+
+router.post('/edit-product', adminController.postUpdateProduct);
+
+router.post('/delete-product', adminController.deleteProduct);
+
+module.exports = router;

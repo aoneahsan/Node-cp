@@ -1,0 +1,25 @@
+<% for(let product of prods) { %>
+<div class="col-12 col-sm-6 col-md-4">
+    <div class="card">
+        <img src="<%= product.image %>" class="card-img-top" />
+        <div class="card-body m-0 pt-0">
+            <h3 class="card-title m-0">
+                <%= product.title %>
+            </h3>
+            <span class="card-title">
+                $<%= product.price %>
+            </span>
+            <p class="card-text">
+                <%= product.description %>
+            </p>
+            <a
+                href="/product-list/<%= product.id %>"
+                class="btn btn-info d-inline-block"
+            >
+                Details
+            </a>
+            <%- include('./add-to-cart.ejs', {product: product}) %>
+        </div>
+    </div>
+</div>
+<% } %>

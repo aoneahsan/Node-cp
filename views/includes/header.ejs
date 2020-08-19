@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title><%= pageTitle %></title>
-        <link rel="stylesheet" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/css/bootstrap.min.css" />
     </head>
     <body>
         <header>
@@ -31,9 +31,34 @@
                                 Shop
                             </a>
                         </li>
-                        <li class="nav-item <%= path === '/add-product' ? 'active' : '' %>">
-                            <a class="nav-link" href="/add-product">
+                        <li class="nav-item <%= path === '/product-list' ? 'active' : '' %> " >
+                            <a class="nav-link" href="/product-list">
+                                Product List
+                            </a>
+                        </li>
+                        <li class="nav-item <%= path === '/orders' ? 'active' : '' %> " >
+                            <a class="nav-link" href="/orders">
+                                Orders
+                            </a>
+                        </li>
+                        <li class="nav-item <%= path === '/cart' ? 'active' : '' %> " >
+                            <a class="nav-link" href="/cart">
+                                Cart
+                            </a>
+                        </li>
+                        <li class="nav-item <%= path === '/checkout' ? 'active' : '' %> " >
+                            <a class="nav-link" href="/checkout">
+                                Checkout
+                            </a>
+                        </li>
+                        <li class="nav-item <%= path === '/admin/add-product' ? 'active' : '' %>">
+                            <a class="nav-link" href="/admin/add-product">
                                 Add Product
+                            </a>
+                        </li>
+                        <li class="nav-item <%= path === '/admin/products' ? 'active' : '' %>">
+                            <a class="nav-link" href="/admin/products">
+                                Admin Products
                             </a>
                         </li>
                     </ul>
