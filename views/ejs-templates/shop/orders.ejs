@@ -19,7 +19,7 @@
                         <strong><%= product.title %></strong>
                         -
                         <strong>Quantity:</strong>
-                        <%= product.orderItem.quantity %>
+                        <%= product.quantity %>
                     </li>
                     <% }) %>
                 </ul>
@@ -28,6 +28,7 @@
         </div>
         <% } else { %>
         <h1><%= pageTitle %></h1>
+        <p>No Order Found. Place one now!</p>
         <% } %>
     </div>
 </main>
