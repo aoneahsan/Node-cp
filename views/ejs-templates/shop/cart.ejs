@@ -2,24 +2,36 @@
 <main class="text-center mt-5">
     <div class="container">
         <% if(cartProducts.length > 0) { %>
-            <h2>Total Cart Price: $<%= cartTotalPrice %></h2>
+        <h2>Total Cart Price: $<%= cartTotalPrice %></h2>
         <ul>
-            <% cartProducts.forEach(item => { %>
+            <% cartProducts.forEach(product => { %>
             <li class="text-left mb-3">
                 <div class="row">
                     <div class="col">
-                        <%= item.product.title %> (<%= item.qty %>)
+                        <%= product.title %> (<%= product.cartItem.quantity %>)
                     </div>
                     <div class="col-auto">
                         <form action="/cart-remove-item" method="post">
-                            <input type="hidden" name="productID" value="<%= item.product.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            <input
+                                type="hidden"
+                                name="productID"
+                                value="<%= product.id %>"
+                            />
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Remove
+                            </button>
                         </form>
                     </div>
                 </div>
             </li>
             <% }) %>
         </ul>
+        <hr />
+        <div class="col text-center">
+            <form action="/place-order" method="post">
+                <button class="btn btn-success btn-sm" type="submit">Place Order</button>
+            </form>
+        </div>
         <% } else { %>
         <h1>Cart is Empty!</h1>
         <% } %>
