@@ -4,18 +4,18 @@
         <% if(cartProducts.length > 0) { %>
         <h2>Total Cart Price: $<%= cartTotalPrice %></h2>
         <ul>
-            <% cartProducts.forEach(item => { %>
+            <% cartProducts.forEach(product => { %>
             <li class="text-left mb-3">
                 <div class="row">
                     <div class="col">
-                        <%= item.product.title %> (<%= item.quantity %>)
+                        <strong>Product: </strong><%= product.title %> - <strong>Quantity:</strong> <%= product.quantity %> - <strong>Price: </strong>$<%= product.price %>
                     </div>
                     <div class="col-auto">
                         <form action="/cart-remove-item" method="post">
                             <input
                                 type="hidden"
                                 name="productID"
-                                value="<%= item.product.id %>"
+                                value="<%= product.id %>"
                             />
                             <button type="submit" class="btn btn-danger btn-sm">
                                 Remove
