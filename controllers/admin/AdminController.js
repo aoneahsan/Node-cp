@@ -9,7 +9,8 @@ exports.getProducts = (req, res, next) => {
             return res.render('ejs-templates/admin/products', {
                 prods: products,
                 pageTitle: "Products List",
-                path: '/admin/products'
+                path: '/admin/products',
+                isLoggedIn: req.session.isLoggedIn
             });
         }).catch(err => {
             console.log(err);
@@ -17,13 +18,20 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getAddProductPage = (req, res, next) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect('/');
+    }
     res.render('ejs-templates/admin/add-product', {
         pageTitle: "Add Product",
-        path: '/admin/add-product'
+        path: '/admin/add-product',
+        isLoggedIn: req.session.isLoggedIn
     });
 };
 
 exports.postStoreProduct = (req, res, next) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect('/');
+    }
     const title = req.body.title;
     const image = req.body.image;
     const price = req.body.price;
@@ -37,6 +45,9 @@ exports.postStoreProduct = (req, res, next) => {
 };
 
 exports.getEditProductPage = (req, res, next) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect('/');
+    }
     let id = req.params.productID;
     const editMode = req.query.edit;
     if (!editMode) {
@@ -51,7 +62,8 @@ exports.getEditProductPage = (req, res, next) => {
             return res.render('ejs-templates/admin/edit-product', {
                 pageTitle: "Edit Product",
                 path: '/admin/edit-product',
-                product: product
+                product: product,
+                isLoggedIn: req.session.isLoggedIn
             });
         }).catch(err => {
             console.log(err);
@@ -59,6 +71,9 @@ exports.getEditProductPage = (req, res, next) => {
 };
 
 exports.postUpdateProduct = (req, res, next) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect('/');
+    }
     const id = req.body.productID;
     const title = req.body.title;
     const image = req.body.image;
@@ -81,6 +96,9 @@ exports.postUpdateProduct = (req, res, next) => {
 };
 
 exports.deleteProduct = (req, res, next) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect('/');
+    }
     const id = req.body.productID;
     Product.findByIdAndRemove(id).then(result => {
         // console.log(result);

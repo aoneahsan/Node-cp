@@ -1,3 +1,6 @@
+// Constants
+const MONGODB_URI = 'mongodb+srv://node_course_DB_user:node_course_DB_user@nodecourseprojectdb.sd1jx.mongodb.net/NodeCourseProjectDB';
+
 // *****************************************
 // All Imports Starts
 // *****************************************
@@ -8,6 +11,8 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const expressSession = require('express-session');
+const mongodbSessionStore = require('connect-mongodb-session')(expressSession);
 
 // Custom Imports
 // Routes Files
@@ -36,10 +41,24 @@ const expressApp = express();
 expressApp.use(express.static(path.join(__dirname, 'public')));
 // expressApp.use(express.static(path.join(__dirname, 'data')));
 
+// adding user session object middleware
+const sessionStore = new mongodbSessionStore({
+    uri: MONGODB_URI,
+    collection: 'sessions'
+});
+expressApp.use(expressSession({
+    secret: "this is my secret, should be unique and long.",
+    resave: false,
+    store: sessionStore,
+    saveUninitialized: false
+}));
 // **********************************************************************************
 // adding default user in global request so it can be retrived from anywhere in the app
 expressApp.use((req, res, next) => {
-    User.findById('5f40941a8b8af870f61df2fa').then(user => {
+    if (!req.session.user) {
+        return next();
+    }
+    User.findById(req.session.user).then(user => {
         req.user = user;
         next();
     }).catch(err => {
@@ -64,7 +83,11 @@ expressApp.use(authRoutes);
 expressApp.use(systemController.getPageNotFound);
 
 // create user after auth module
-mongoose.connect('mongodb+srv://node_course_DB_user:node_course_DB_user@nodecourseprojectdb.sd1jx.mongodb.net/', { dbName: 'NodeCourseProjectDB', useUnifiedTopology: true, useNewUrlParser: true })
+mongoose.connect(MONGODB_URI
+    , {
+        useUnifiedTopology: true,
+        useNewUrlParser: true
+    })
     .then(result => {
         console.log("mongoDB Connected with mongoose!");
         User.findOne()

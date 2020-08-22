@@ -18,7 +18,9 @@
             >
                 Details
             </a>
-            <%- include('./add-to-cart.ejs', {product: product}) %>
+            <% if(isLoggedIn) { %>
+                <%- include('./add-to-cart.ejs', {product: product}) %>
+            <% } %>
         </div>
     </div>
 </div>
