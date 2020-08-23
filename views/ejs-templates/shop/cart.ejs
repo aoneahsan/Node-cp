@@ -1,4 +1,4 @@
-<%- include('./../../includes/header.ejs') %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center mt-5">
     <div class="container">
         <% if(cartProducts.length > 0) { %>
@@ -17,6 +17,7 @@
                                 name="productID"
                                 value="<%= product.id %>"
                             />
+                            <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
                             <button type="submit" class="btn btn-danger btn-sm">
                                 Remove
                             </button>
@@ -29,6 +30,7 @@
         <hr />
         <div class="col text-center">
             <form action="/place-order" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
                 <button class="btn btn-success btn-sm" type="submit">Place Order</button>
             </form>
         </div>

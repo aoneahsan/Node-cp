@@ -1,4 +1,4 @@
-<%- include('./../../includes/header.ejs') %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center mt-5">
     <div class="container">
         <h1>Login</h1>
@@ -11,6 +11,7 @@
                     name="email"
                     id="email"
                     placeholder="Enter Email"
+                    value="test@demo.com"
                 />
             </div>
             <div class="form-group">
@@ -21,8 +22,10 @@
                     name="password"
                     id="password"
                     placeholder="Enter Password"
+                    value="123456"
                 />
             </div>
+            <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
             <div class="form-group text-center">
                 <button type="submit" class="btn btn-outline-success">Login</button>
             </div>

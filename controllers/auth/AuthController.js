@@ -1,40 +1,102 @@
 const User = require('./../../models/user');
+const bcrypt = require('bcryptjs');
 
 module.exports.getLogin = (req, res, next) => {
-    if (req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
-    // console.log("Login Page Get Route: Session: ",req.session);
-    // console.log("Login Page Get Route: Cookie: ",req.get('Cookie'));
     res.render('ejs-templates/auth/login', {
         pageTitle: "Login",
         path: '/login',
-        isLoggedIn: req.session.isLoggedIn
+        isLoggedIn: req.session.isLoggedIn,
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
     });
 }
 
 module.exports.postLogin = (req, res, next) => {
-    if (req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
-    // old working with cookie // res.setHeader('Set-Cookie', 'new-cookie=working');
-    User.findById('5f40941a8b8af870f61df2fa')
+    const email = req.body.email;
+    const password = req.body.password;
+    User.findOne({ email: email })
         .then(user => {
-            req.session.isLoggedIn = true;
-            req.session.user = user;
-            req.session.save((err) => {
-                // console.log(err);
-                res.redirect('/');
-            })
+            if (!user) {
+                req.flash('error', "Invalid Data Entered");
+                return res.redirect('/login');
+            } else {
+                return bcrypt.compare(password, user.password)
+                    .then(validPassword => {
+                        if (!validPassword) {
+                            req.flash('warning', "Invalid Data Entered");
+                            return res.redirect('/login');
+                        }
+                        else {
+                            req.session.isLoggedIn = true;
+                            req.session.user = user;
+                            return req.session.save((err) => {
+                                req.flash('success', "Welcome Back " + user.name + '!');
+                                return res.redirect('/');
+                            });
+                        }
+                    });
+            }
+        })
+        .catch(err => console.log(err));
+}
+
+module.exports.getRegister = (req, res, next) => {
+    res.render('ejs-templates/auth/register', {
+        pageTitle: "Register",
+        path: '/register',
+        isLoggedIn: req.session.isLoggedIn,
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
+    });
+}
+
+module.exports.postRegister = (req, res, next) => {
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const password_confirm = req.body.password_confirm;
+    if (password !== password_confirm) {
+        req.flash('warning', "Password Not Matched");
+        return res.redirect('/register');
+    }
+    User.findOne({ email: email })
+        .then(user => {
+            if (!user) {
+                return bcrypt.hash(password, 12)
+                    .then(hashedPassword => {
+                        return User.create({
+                            name: name,
+                            email: email,
+                            password: hashedPassword,
+                            cart: { items: [] }
+                        })
+                            .then(registeredUser => {
+                                if (!registeredUser) {
+                                    req.flash('error', "Error Occured while registeration process, please try again.");
+                                    return res.redirect('/register');
+                                }
+                                req.session.isLoggedIn = true;
+                                req.session.user = registeredUser;
+                                return req.session.save((err) => {
+                                    req.flash('success', "Welcome " + registeredUser.name + ", you are registered successfully!");
+                                    return res.redirect('/');
+                                });
+                            })
+                            .catch(err => console.log(err));
+                    })
+                    .catch(err => console.log(err));
+            }
+            else {
+                req.flash('error', "User already exists with this email.");
+                return res.redirect('/register');
+            }
         })
         .catch(err => console.log(err));
 }
 
 module.exports.postLogout = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
-    // old working with cookie // res.setHeader('Set-Cookie', 'new-cookie=working');
     req.session.destroy(() => {
         res.redirect('/');
     });

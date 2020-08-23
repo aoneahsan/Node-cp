@@ -19,7 +19,7 @@
                 Details
             </a>
             <% if(isLoggedIn) { %>
-                <%- include('./add-to-cart.ejs', {product: product}) %>
+                <%- include('./add-to-cart.ejs', {product: product, csrfTokken: csrfTokken}) %>
             <% } %>
         </div>
     </div>

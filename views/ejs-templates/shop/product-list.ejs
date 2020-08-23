@@ -1,4 +1,4 @@
-<%- include('./../../includes/header.ejs') %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center mt-5">
     <div class="container">
         <% if(prods.length > 0) { %>

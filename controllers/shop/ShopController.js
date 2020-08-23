@@ -4,14 +4,16 @@ const Order = require('./../../models/order');
 exports.getIndex = (req, res, next) => {
     Product.find()
         .then(products => {
-            // console.log(products);
             return res.render('ejs-templates/shop/index', {
                 prods: products,
                 pageTitle: "Shop Page",
                 path: '/shop',
-                isLoggedIn: req.session.isLoggedIn
+                successMessage: req.flash('success'),
+                warningMessage: req.flash('warning'),
+                errorMessage: req.flash('error')
             });
         }).catch(err => {
+            req.flash('error', "Error Occured!");
             console.log(err);
         });
 };
@@ -19,29 +21,31 @@ exports.getIndex = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
     Product.find()
         .then(products => {
-            // console.log(products);
             return res.render('ejs-templates/shop/product-list', {
                 prods: products,
                 pageTitle: "Products List",
                 path: '/product-list',
-                isLoggedIn: req.session.isLoggedIn
+                successMessage: req.flash('success'),
+                warningMessage: req.flash('warning'),
+                errorMessage: req.flash('error')
             });
         }).catch(err => {
+            req.flash('error', "Error Occured!");
             console.log(err);
         });
 };
 
 exports.getProductDetail = (req, res, next) => {
     let id = req.params.productID;
-    // console.log("i am in.", id);
     Product.findById(id)
         .then(product => {
-            // console.log(product);
             res.render('ejs-templates/shop/product-detail', {
                 product: product,
                 pageTitle: "Product Detail",
                 path: '/product-detail',
-                isLoggedIn: req.session.isLoggedIn
+                successMessage: req.flash('success'),
+                warningMessage: req.flash('warning'),
+                errorMessage: req.flash('error')
             });
         }).catch(err => {
             console.log(err);
@@ -49,9 +53,6 @@ exports.getProductDetail = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     req.user
         .populate('cart.items.productID')
         .execPopulate()
@@ -78,18 +79,18 @@ exports.getCart = (req, res, next) => {
                 path: '/cart',
                 cartTotalPrice: cartTotalPrice,
                 cartProducts: products,
-                isLoggedIn: req.session.isLoggedIn
+                successMessage: req.flash('success'),
+                warningMessage: req.flash('warning'),
+                errorMessage: req.flash('error')
             });
         })
         .catch(err => {
+            req.flash('error', "Error Occured!");
             console.log(err);
         });
 };
 
 exports.postCart = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     let prodID = req.body.productID;
     req.user.addToCart(prodID)
         .then(result => {
@@ -97,6 +98,7 @@ exports.postCart = (req, res, next) => {
                 return res.redirect('/cart');
             }
             else {
+                req.flash('error', "Error Occured!");
                 return res.redirect('/404');
             }
         })
@@ -104,15 +106,13 @@ exports.postCart = (req, res, next) => {
 };
 
 exports.removeCartItem = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     const prodID = req.body.productID;
     req.user.removeFromCart(prodID)
         .then(result => {
             if (result) {
                 return res.redirect('/cart');
             } else {
+                req.flash('error', "Error Occured!");
                 return res.status(400).redirect('/404');
             }
         })
@@ -120,21 +120,17 @@ exports.removeCartItem = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     // console.log("Checkout Page Get Route: ",req.session);
     res.render('ejs-templates/shop/checkout', {
         pageTitle: "Checkout",
         path: '/checkout',
-        isLoggedIn: req.session.isLoggedIn
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
     });
 };
 
 exports.getOrders = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     let userID = null;
     if (req.session.user) {
         userID = req.session.user._id;
@@ -146,16 +142,15 @@ exports.getOrders = (req, res, next) => {
                 pageTitle: "Orders",
                 path: '/orders',
                 orders: orders,
-                isLoggedIn: req.session.isLoggedIn
+                successMessage: req.flash('success'),
+                warningMessage: req.flash('warning'),
+                errorMessage: req.flash('error')
             });
         })
         .catch(err => console.log(err));
 };
 
 exports.placeOrder = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     req.user
         .populate('cart.items.productID')
         .execPopulate()
@@ -191,6 +186,7 @@ exports.placeOrder = (req, res, next) => {
         })
         .then(result => {
             if (!result) {
+                req.flash('error', "Error Occured!");
                 return res.status(400).redirect('/');
             }
             return res.status(200).redirect('/orders');

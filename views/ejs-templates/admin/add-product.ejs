@@ -1,4 +1,4 @@
-<%- include('./../../includes/header.ejs') %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center">
     <h1 class="display-4">Add Product</h1>
     <form action="/admin/add-product" method="post" class="form w-75 mx-auto">
@@ -47,6 +47,7 @@
                 placeholder="Enter Product Description"
             ></textarea>
         </div>
+        <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
         <button type="submit" class="btn btn-outline-info btn-sm mx-auto">
             Add Product
         </button>

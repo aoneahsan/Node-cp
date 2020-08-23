@@ -1,16 +1,15 @@
 const Product = require('../../models/product');
-// const User = require('../../models/user');
 
 exports.getProducts = (req, res, next) => {
     Product.find()
-        // .select('title description price')
-        // .populate('userID', 'name email')
         .then(products => {
             return res.render('ejs-templates/admin/products', {
                 prods: products,
                 pageTitle: "Products List",
                 path: '/admin/products',
-                isLoggedIn: req.session.isLoggedIn
+                successMessage: req.flash('success'),
+                warningMessage: req.flash('warning'),
+                errorMessage: req.flash('error')
             });
         }).catch(err => {
             console.log(err);
@@ -18,20 +17,16 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getAddProductPage = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     res.render('ejs-templates/admin/add-product', {
         pageTitle: "Add Product",
         path: '/admin/add-product',
-        isLoggedIn: req.session.isLoggedIn
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
     });
 };
 
 exports.postStoreProduct = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     const title = req.body.title;
     const image = req.body.image;
     const price = req.body.price;
@@ -39,21 +34,24 @@ exports.postStoreProduct = (req, res, next) => {
     const product = new Product({ title: title, description: description, image: image, price: price, userID: req.user });
     product.save()
         .then(result => {
+            req.flash('success', 'Product Added Successfully!');
             return res.status(200).redirect('/admin/products');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            req.flash('error', 'Error Occured while creating Product!');
+            console.log(err)
+        });
 };
 
 exports.getEditProductPage = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     let id = req.params.productID;
     const editMode = req.query.edit;
     if (!editMode) {
+        req.flash('warning', 'Something went wrong may be editing mode!');
         return res.status(400).redirect('/admin/products');
     }
     if (!id) {
+        req.flash('error', 'No Product Found!');
         return res.status(404).redirect('/admin/products');
     }
     Product.findById(id)
@@ -63,7 +61,9 @@ exports.getEditProductPage = (req, res, next) => {
                 pageTitle: "Edit Product",
                 path: '/admin/edit-product',
                 product: product,
-                isLoggedIn: req.session.isLoggedIn
+                successMessage: req.flash('success'),
+                warningMessage: req.flash('warning'),
+                errorMessage: req.flash('error')
             });
         }).catch(err => {
             console.log(err);
@@ -71,9 +71,6 @@ exports.getEditProductPage = (req, res, next) => {
 };
 
 exports.postUpdateProduct = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     const id = req.body.productID;
     const title = req.body.title;
     const image = req.body.image;
@@ -88,7 +85,7 @@ exports.postUpdateProduct = (req, res, next) => {
             return product.save();
         })
         .then(result => {
-            // console.log(result);
+            req.flash('success', 'Product Updated Successfully!');
             return res.status(200).redirect('/admin/products');
         }).catch(err => {
             console.log(err);
@@ -96,14 +93,12 @@ exports.postUpdateProduct = (req, res, next) => {
 };
 
 exports.deleteProduct = (req, res, next) => {
-    if (!req.session.isLoggedIn) {
-        return res.redirect('/');
-    }
     const id = req.body.productID;
     Product.findByIdAndRemove(id).then(result => {
-        // console.log(result);
+        req.flash('success', 'Product Deleted Successfully!');
         return res.status(200).redirect('/admin/products');
     }).catch(err => {
+        req.flash('error', 'Error Occured while deleting Product!');
         console.log(err);
     });
 };

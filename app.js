@@ -11,8 +11,10 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const expressSession = require('express-session');
-const mongodbSessionStore = require('connect-mongodb-session')(expressSession);
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+// const csrf = require('csurf');
+const flash = require('connect-flash');
 
 // Custom Imports
 // Routes Files
@@ -42,25 +44,35 @@ expressApp.use(express.static(path.join(__dirname, 'public')));
 // expressApp.use(express.static(path.join(__dirname, 'data')));
 
 // adding user session object middleware
-const sessionStore = new mongodbSessionStore({
+const store = new MongoDBStore({
     uri: MONGODB_URI,
     collection: 'sessions'
 });
-expressApp.use(expressSession({
+expressApp.use(session({
     secret: "this is my secret, should be unique and long.",
     resave: false,
-    store: sessionStore,
+    store: store,
     saveUninitialized: false
 }));
+// expressApp.use(csrf()); // not working
+expressApp.use(flash());
 // **********************************************************************************
 // adding default user in global request so it can be retrived from anywhere in the app
 expressApp.use((req, res, next) => {
-    if (!req.session.user) {
-        return next();
-    }
     User.findById(req.session.user).then(user => {
-        req.user = user;
-        next();
+        if (user) {
+            console.log("session user found and set done");
+            req.user = user;
+            res.locals.isLoggedIn = req.session.isLoggedIn;
+            res.locals.csrfTokken = "req.csrfToken()";
+            next();
+        }
+        else {
+            res.locals.isLoggedIn = req.session.isLoggedIn;
+            console.log("session user found and set done");
+            res.locals.csrfTokken = "req.csrfToken()";
+            return next();
+        }
     }).catch(err => {
         console.log(err);
     });
@@ -90,14 +102,6 @@ mongoose.connect(MONGODB_URI
     })
     .then(result => {
         console.log("mongoDB Connected with mongoose!");
-        User.findOne()
-            .then(user => {
-                // console.log(user);
-                if (!user) {
-                    User.create({ name: 'Ahsan', email: 'ahsan@demo.com', cart: { items: [] } });
-                }
-            })
-            .catch(err => console.log(err));
         // starting server
         expressApp.listen(3000);
     })

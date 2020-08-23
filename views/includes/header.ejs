@@ -84,11 +84,23 @@
                                 Login
                             </a>
                         </li>
+                        <li
+                            class="nav-item <%= path === '/register' ? 'active' : '' %>"
+                        >
+                            <a class="nav-link" href="/register">
+                                Register
+                            </a>
+                        </li>
                         <% } %> <% if(isLoggedIn) { %>
                         <li
                             class="nav-item <%= path === '/logout' ? 'active' : '' %>"
                         >
                             <form action="/logout" method="post">
+                                <input
+                                    type="hidden"
+                                    name="_csrf"
+                                    value="<%= csrfTokken %>"
+                                />
                                 <button class="nav-link" href="/logout">
                                     Logout
                                 </button>
@@ -99,5 +111,23 @@
                 </div>
             </nav>
         </header>
-    </body>
-</html>
+        <!-- Success, Warning, Danger Alerts -->
+        <% if(!!successMessage.length > 0 || !!warningMessage.length > 0 || !!errorMessage.length > 0) { %>
+        <div class="container mt-4">
+            <% if(!!successMessage.length > 0) { %>
+            <div class="alert alert-success">
+                <strong><%= successMessage %></strong>
+            </div>
+            <% } %>
+            <% if(!!warningMessage.length > 0) { %>
+            <div class="alert alert-warning">
+                <strong><%= warningMessage %></strong>
+            </div>
+            <% } %>
+            <% if(!!errorMessage.length > 0) { %>
+            <div class="alert alert-danger">
+                <strong><%= errorMessage %></strong>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
