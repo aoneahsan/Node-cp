@@ -61,7 +61,7 @@ expressApp.use(flash());
 expressApp.use((req, res, next) => {
     User.findById(req.session.user).then(user => {
         if (user) {
-            console.log("session user found and set done");
+            // console.log("session user found and set done");
             req.user = user;
             res.locals.isLoggedIn = req.session.isLoggedIn;
             res.locals.csrfTokken = "req.csrfToken()";
@@ -69,7 +69,7 @@ expressApp.use((req, res, next) => {
         }
         else {
             res.locals.isLoggedIn = req.session.isLoggedIn;
-            console.log("session user found and set done");
+            // console.log("session user found and set done");
             res.locals.csrfTokken = "req.csrfToken()";
             return next();
         }

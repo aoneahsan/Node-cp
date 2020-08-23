@@ -1,7 +1,7 @@
 <%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center mt-5">
     <div class="container">
-        <h1>Register</h1>
+        <h1><%= pageTitle %></h1>
         <form action="/register" method="post" class="col-12 col-sm-6 mx-auto border p-5 mt-4 text-left">
             <div class="form-group">
                 <label for="name">Name</label>

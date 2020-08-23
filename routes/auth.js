@@ -17,4 +17,12 @@ router.post('/register', unauthMiddleware, authController.postRegister);
 
 router.post('/logout', authMiddleware, authController.postLogout);
 
+router.get('/reset', unauthMiddleware, authController.getResetPassword);
+
+router.post('/reset', unauthMiddleware, authController.postResetPassword);
+
+router.get('/reset/:token', unauthMiddleware, authController.getNewPassword);
+
+router.post('/reset/:token', unauthMiddleware, authController.postNewPassword);
+
 module.exports = router;

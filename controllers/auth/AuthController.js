@@ -1,11 +1,20 @@
 const User = require('./../../models/user');
 const bcrypt = require('bcryptjs');
 
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+const appKeys = require('./../../utils/app-keys');
+
+const mailTransporter = nodemailer.createTransport(sendgridTransport({
+    auth: {
+        api_key: appKeys.sendgridAPIKey
+    }
+}))
+
 module.exports.getLogin = (req, res, next) => {
     res.render('ejs-templates/auth/login', {
         pageTitle: "Login",
         path: '/login',
-        isLoggedIn: req.session.isLoggedIn,
         successMessage: req.flash('success'),
         warningMessage: req.flash('warning'),
         errorMessage: req.flash('error')
@@ -45,7 +54,6 @@ module.exports.getRegister = (req, res, next) => {
     res.render('ejs-templates/auth/register', {
         pageTitle: "Register",
         path: '/register',
-        isLoggedIn: req.session.isLoggedIn,
         successMessage: req.flash('success'),
         warningMessage: req.flash('warning'),
         errorMessage: req.flash('error')
@@ -81,7 +89,17 @@ module.exports.postRegister = (req, res, next) => {
                                 req.session.user = registeredUser;
                                 return req.session.save((err) => {
                                     req.flash('success', "Welcome " + registeredUser.name + ", you are registered successfully!");
-                                    return res.redirect('/');
+                                    res.redirect('/');
+                                    return mailTransporter.sendMail({
+                                        to: email,
+                                        from: appKeys.fromEmailAddress,
+                                        subject: "Signup Completed - Welcome "+name,
+                                        html: "<h1>Hi, welcome to this community, we wish you a great journy with us :)"
+                                    }).then(result => {
+
+                                    }).catch(err => {
+                                        console.log("Signup Email Sending Failed!", err);
+                                    });
                                 });
                             })
                             .catch(err => console.log(err));
@@ -99,5 +117,53 @@ module.exports.postRegister = (req, res, next) => {
 module.exports.postLogout = (req, res, next) => {
     req.session.destroy(() => {
         res.redirect('/');
+    });
+}
+
+module.exports.getResetPassword = (req, res, next) => {
+    res.render('ejs-templates/auth/reset-password', {
+        pageTitle: "Reset Password",
+        path: '/reset-password',
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
+    });
+}
+
+module.exports.postResetPassword = (req, res, next) => {
+    res.render('ejs-templates/auth/reset-password', {
+        pageTitle: "Reset Password",
+        path: '/reset-password',
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
+    });
+}
+
+module.exports.getNewPassword = (req, res, next) => {
+    const resetToken = req.params.token;
+    if (!resetToken) {
+        flash('warning', 'Something went wrong!');
+    }
+    res.render('ejs-templates/auth/new-password', {
+        pageTitle: "Update Password",
+        path: '/new-password',
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
+    });
+}
+
+module.exports.postNewPassword = (req, res, next) => {
+    const resetToken = req.params.token;
+    if (!resetToken) {
+        flash('warning', 'Something went wrong!');
+    }
+    res.render('ejs-templates/auth/new-password', {
+        pageTitle: "Update Password",
+        path: '/new-password',
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error')
     });
 }
