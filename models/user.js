@@ -14,6 +14,8 @@ const userSchema = new Schema({
         type: String,
         require: true
     },
+    resetToken: String,
+    resetTokenExpreIn: Number,
     cart: {
         items: {
             type: [

@@ -26,8 +26,11 @@
                 />
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-outline-success">Login</button>
+            <div class="text-center">
+                <div class="form-group text-center d-inline-block">
+                    <button type="submit" class="btn btn-outline-success">Login</button>
+                </div>
+                <a href="/reset" class="btn btn-outline-warning d-inline-block">Reset Password</a>
             </div>
         </form>
     </div>

@@ -56,6 +56,10 @@ exports.getEditProductPage = (req, res, next) => {
     }
     Product.findById(id)
         .then(product => {
+            if (product.userID.toString() != req.user._id.toString()) {
+                req.flash('error', "Don't have correct permission!");
+                return res.redirect('/');
+            }
             // console.log(product);
             return res.render('ejs-templates/admin/edit-product', {
                 pageTitle: "Edit Product",
@@ -78,6 +82,10 @@ exports.postUpdateProduct = (req, res, next) => {
     const description = req.body.description;
     Product.findById(id)
         .then(product => {
+            if (product.userID.toString() != req.user._id.toString()) {
+                req.flash('error', "Don't have correct permission!");
+                return res.redirect('/');
+            }
             product.title = title;
             product.description = description;
             product.price = price;
@@ -94,9 +102,15 @@ exports.postUpdateProduct = (req, res, next) => {
 
 exports.deleteProduct = (req, res, next) => {
     const id = req.body.productID;
-    Product.findByIdAndRemove(id).then(result => {
-        req.flash('success', 'Product Deleted Successfully!');
-        return res.status(200).redirect('/admin/products');
+    Product.findById(id).then(product => {
+        if (product.userID.toString() != req.user._id.toString()) {
+            req.flash('error', "Don't have correct permission!");
+            return res.redirect('/');
+        }
+        return product.delete((err) => {
+            req.flash('success', 'Product Deleted Successfully!');
+            return res.status(200).redirect('/admin/products');
+        });
     }).catch(err => {
         req.flash('error', 'Error Occured while deleting Product!');
         console.log(err);

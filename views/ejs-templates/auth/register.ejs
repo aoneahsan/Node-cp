@@ -48,8 +48,11 @@
                 />
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-outline-success">Register</button>
+            <div class="text-center">
+                <div class="form-group text-center d-inline-block">
+                    <button type="submit" class="btn btn-outline-success">Register</button>
+                </div>
+                <a href="/login" class="btn btn-outline-warning d-inline-block">Already a Member?</a>
             </div>
         </form>
     </div>

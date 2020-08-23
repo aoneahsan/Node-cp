@@ -1,5 +1,6 @@
 const User = require('./../../models/user');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
@@ -93,10 +94,9 @@ module.exports.postRegister = (req, res, next) => {
                                     return mailTransporter.sendMail({
                                         to: email,
                                         from: appKeys.fromEmailAddress,
-                                        subject: "Signup Completed - Welcome "+name,
+                                        subject: "Signup Completed - Welcome " + name,
                                         html: "<h1>Hi, welcome to this community, we wish you a great journy with us :)"
                                     }).then(result => {
-
                                     }).catch(err => {
                                         console.log("Signup Email Sending Failed!", err);
                                     });
@@ -131,23 +131,62 @@ module.exports.getResetPassword = (req, res, next) => {
 }
 
 module.exports.postResetPassword = (req, res, next) => {
-    res.render('ejs-templates/auth/reset-password', {
-        pageTitle: "Reset Password",
-        path: '/reset-password',
-        successMessage: req.flash('success'),
-        warningMessage: req.flash('warning'),
-        errorMessage: req.flash('error')
-    });
+    const email = req.body.email;
+    crypto.randomBytes(32, (err, buffer) => {
+        if (err) {
+            req.flash('error', "Something went wrong!");
+            return res.redirect('/reset');
+        } else {
+            let resetToken = buffer.toString('hex');
+            let resetTokenExpreIn = Date.now() + 3600000;
+            User.findOne({ email: email })
+                .then(user => {
+                    if (!user) {
+                        req.flash('error', "no user found!");
+                        return res.redirect('/reset');
+                    }
+                    else {
+                        user.resetToken = resetToken;
+                        user.resetTokenExpreIn = resetTokenExpreIn;
+                        user.save()
+                            .then(result => {
+                                if (!result) {
+                                    req.flash('error', "Error Occured, try again!");
+                                    return res.redirect('/reset');
+                                }
+                                mailTransporter.sendMail({
+                                    to: email,
+                                    from: appKeys.fromEmailAddress,
+                                    subject: "Reset Password Link",
+                                    html: `
+                                    <p>You request a reset password link</p>
+                                    <p>click the <a href="${appKeys.appRootURL}/reset/${resetToken}">link</a> to reset your account password</p>
+                                    `
+                                });
+                                req.flash('success', "Password Reset Mail Send, Check your Email!");
+                                return res.redirect('/reset');
+                            }).catch(err => {
+                                console.log(err);
+                                req.flash('error', "Something went wrong!");
+                                return res.redirect('/reset');
+                            });
+                    }
+                })
+                .catch(err => console.log(err))
+        }
+    })
 }
 
 module.exports.getNewPassword = (req, res, next) => {
     const resetToken = req.params.token;
     if (!resetToken) {
-        flash('warning', 'Something went wrong!');
+        req.flash('warning', 'Something went wrong!');
+        return res.redirect('/login');
     }
-    res.render('ejs-templates/auth/new-password', {
+    res.render('ejs-templates/auth/update-password', {
         pageTitle: "Update Password",
-        path: '/new-password',
+        path: '/update-password',
+        resetToken: resetToken,
         successMessage: req.flash('success'),
         warningMessage: req.flash('warning'),
         errorMessage: req.flash('error')
@@ -157,13 +196,48 @@ module.exports.getNewPassword = (req, res, next) => {
 module.exports.postNewPassword = (req, res, next) => {
     const resetToken = req.params.token;
     if (!resetToken) {
-        flash('warning', 'Something went wrong!');
+        req.flash('warning', 'Something went wrong!');
+        return res.redirect('/login');
     }
-    res.render('ejs-templates/auth/new-password', {
-        pageTitle: "Update Password",
-        path: '/new-password',
-        successMessage: req.flash('success'),
-        warningMessage: req.flash('warning'),
-        errorMessage: req.flash('error')
-    });
+    const password = req.body.password;
+    const password_confirm = req.body.password_confirm;
+    if (password !== password_confirm) {
+        req.flash('warning', 'Password didn`t match!');
+        return res.redirect(`${appKeys.appRootURL}/reset/${resetToken}`);
+    }
+    let currentDate = Date.now();
+    User.findOne({ resetToken: resetToken, resetTokenExpreIn: { $gt: currentDate } })
+        .then(user => {
+            if (!user) {
+                req.flash('error', 'Something went wrong!');
+                return res.redirect('/login');
+            }
+            return bcrypt.hash(password, 12)
+                .then(hashedPassword => {
+                    if (!hashedPassword) {
+                        req.flash('error', 'Something went wrong!');
+                        return res.redirect('/login');
+                    }
+                    else {
+                        user.password = hashedPassword;
+                        user.resetToken = null;
+                        user.resetTokenExpreIn = null;
+                        return user.save((err) => {
+                            if (err) {
+                                req.flash('error', 'Something went wrong!');
+                                return res.redirect('/login');
+                            }
+                            req.session.isLoggedIn = true;
+                            req.session.user = user;
+                            return req.session.save((err) => {
+                                req.flash('success', "Welcome " + user.name + ", your password has been reset successfully!");
+                                res.redirect('/');
+                            });
+                        })
+                    }
+                })
+                .catch(err => console.log(err))
+
+        })
+        .catch(err => console.log(err))
 }
