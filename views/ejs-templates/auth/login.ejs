@@ -1,36 +1,69 @@
-<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage,
+warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center mt-5">
+    <% if (errors.length > 0) { %>
+        <div
+            class="alert alert-warning alert-dismissible fade show"
+            role="alert"
+        >
+            <button
+                type="button"
+                class="close"
+                data-dismiss="alert"
+                aria-label="Close"
+            >
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong><%= errors[0].msg %></strong>
+        </div>
+        <% } %>
     <div class="container">
         <h1><%= pageTitle %></h1>
-        <form action="/login" method="post" class="col-12 col-sm-6 mx-auto border p-5 mt-4 text-left">
+        <form
+            action="/login"
+            method="post"
+            class="col-12 col-sm-6 mx-auto border p-5 mt-4 text-left"
+            novalidate
+            autocomplete="off"
+        >
             <div class="form-group">
                 <label for="email">Email</label>
                 <input
                     type="text"
-                    class="form-control"
+                    class="form-control <%= errors.find(e => e.param === 'email') ? 'border-danger' : '' %>"
                     name="email"
                     id="email"
                     placeholder="Enter Email"
-                    value="test@demo.com"
+                    value="<%= oldInputs.email %>"
                 />
+                <% if(errors.find(e => e.param === 'email')) { %>
+                    <span class="small"><%= errors.find(e => e.param === 'email') ? errors.find(e => e.param === 'email').msg : '' %></span>
+                <% } %>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <input
-                    type="text"
-                    class="form-control"
+                    type="password"
+                    class="form-control <%= errors.find(e => e.param === 'password') ? 'border-danger' : '' %>"
                     name="password"
                     id="password"
                     placeholder="Enter Password"
-                    value="123456"
+                    value="<%= oldInputs.password %>"
                 />
+                <% if(errors.find(e => e.param === 'password')) { %>
+                    <span class="small"><%= errors.find(e => e.param === 'password') ? errors.find(e => e.param === 'password').msg : '' %></span>
+                <% } %>
             </div>
-            <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
+            <input type="hidden" name="_csrf" value="<%= csrfTokken %>" />
             <div class="text-center">
                 <div class="form-group text-center d-inline-block">
-                    <button type="submit" class="btn btn-outline-success">Login</button>
+                    <button type="submit" class="btn btn-outline-success">
+                        Login
+                    </button>
                 </div>
-                <a href="/reset" class="btn btn-outline-warning d-inline-block">Reset Password</a>
+                <a href="/reset" class="btn btn-outline-warning d-inline-block">
+                    Reset Password
+                </a>
             </div>
         </form>
     </div>

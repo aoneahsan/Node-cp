@@ -1,59 +1,102 @@
-<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage,
+warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center">
-    <h1 class="display-4">Update Product</h1>
-    <form action="/admin/edit-product" method="post" class="form w-75 mx-auto">
-        <input type="hidden" name="productID" value="<%= product.id %>" />
-        <div class="form-group text-left">
-            <label for="title">Enter Product Title</label>
-            <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                required
-                value="<%= product.title %>"
-                placeholder="Enter Product Title"
-            />
-        </div>
-        <div class="form-group text-left">
-            <label for="image">Enter Product Image</label>
-            <input
-                type="text"
-                class="form-control"
-                name="image"
-                id="image"
-                required
-                value="<%= product.image %>"
-                placeholder="Enter Product Image"
-            />
-        </div>
-        <div class="form-group text-left">
-            <label for="price">Enter Product Price</label>
-            <input
-                type="number"
-                step="0.01"
-                class="form-control"
-                name="price"
-                id="price"
-                required
-                value="<%= product.price %>"
-                placeholder="Enter Product Price"
-            />
-        </div>
-        <div class="form-group text-left">
-            <label for="description">Enter Product Description</label>
-            <textarea
-                class="form-control"
-                name="description"
-                id="description"
-                required
-                placeholder="Enter Product Description"
-            ><%= product.description %></textarea>
-        </div>
-        <input type="hidden" name="_csrf" value="<%= csrfTokken %>">
-        <button type="submit" class="btn btn-outline-info btn-sm mx-auto">
-            Update Product
+    <% if (errors.length > 0) { %>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+        >
+            <span aria-hidden="true">&times;</span>
         </button>
-    </form>
+        <strong><%= errors[0].msg %></strong>
+    </div>
+    <% } %>
+    <div class="container">
+        <h1 class="display-4">Update Product</h1>
+        <form
+            action="/admin/edit-product"
+            method="post"
+            class="form w-75 mx-auto"
+        >
+            <input type="hidden" name="productID" value="<%= product.id %>" />
+            <div class="form-group text-left">
+                <label for="title">Enter Product Title</label>
+                <input
+                    type="text"
+                    class="form-control <%= errors.find(e => e.param === 'title') ? 'border-danger' : '' %>"
+                    name="title"
+                    id="title"
+                    placeholder="Enter Product Title"
+                    value="<%= oldInputs.title ? oldInputs.title : product.title %>"
+                />
+                <% if(errors.find(e => e.param === 'title')) { %>
+                <span class="small">
+                    <%= errors.find(e => e.param === 'title') ? errors.find(e =>
+                    e.param === 'title').msg : '' %>
+                </span>
+                <% } %>
+            </div>
+            <div class="form-group text-left">
+                <label for="image">Enter Product Image</label>
+                <input
+                    type="text"
+                    class="form-control <%= errors.find(e => e.param === 'image') ? 'border-danger' : '' %>"
+                    name="image"
+                    id="image"
+                    required
+                    value="<%= oldInputs.image ? oldInputs.image : product.image %>"
+                    placeholder="Enter Product Image"
+                />
+                <% if(errors.find(e => e.param === 'image')) { %>
+                <span class="small">
+                    <%= errors.find(e => e.param === 'image') ? errors.find(e =>
+                    e.param === 'image').msg : '' %>
+                </span>
+                <% } %>
+            </div>
+            <div class="form-group text-left">
+                <label for="price">Enter Product Price</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    class="form-control <%= errors.find(e => e.param === 'price') ? 'border-danger' : '' %>"
+                    name="price"
+                    id="price"
+                    required
+                    placeholder="Enter Product Price"
+                    value="<%= oldInputs.price ? oldInputs.price : product.price %>"
+                />
+                <% if(errors.find(e => e.param === 'price')) { %>
+                <span class="small">
+                    <%= errors.find(e => e.param === 'price') ? errors.find(e =>
+                    e.param === 'price').msg : '' %>
+                </span>
+                <% } %>
+            </div>
+            <div class="form-group text-left">
+                <label for="description">Enter Product Description</label>
+                <textarea
+                    class="form-control <%= errors.find(e => e.param === 'description') ? 'border-danger' : '' %>"
+                    name="description"
+                    id="description"
+                    required
+                    placeholder="Enter Product Description"
+                ><%= oldInputs.description ? oldInputs.description : product.description %></textarea>
+                <% if(errors.find(e => e.param === 'description')) { %>
+                <span class="small">
+                    <%= errors.find(e => e.param === 'description') ? errors.find(e =>
+                    e.param === 'description').msg : '' %>
+                </span>
+                <% } %>
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfTokken %>" />
+            <button type="submit" class="btn btn-outline-info btn-sm mx-auto">
+                Update Product
+            </button>
+        </form>
+    </div>
 </main>
 <%- include('./../../includes/footer.ejs') %>

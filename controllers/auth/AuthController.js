@@ -1,6 +1,7 @@
 const User = require('./../../models/user');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { validationResult } = require('express-validator');
 
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
@@ -18,13 +19,33 @@ module.exports.getLogin = (req, res, next) => {
         path: '/login',
         successMessage: req.flash('success'),
         warningMessage: req.flash('warning'),
-        errorMessage: req.flash('error')
+        errorMessage: req.flash('error'),
+        errors: [],
+        oldInputs: {
+            email: '',
+            password: ''
+        }
     });
 }
 
 module.exports.postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render('ejs-templates/auth/login', {
+            pageTitle: "Login",
+            path: '/login',
+            successMessage: req.flash('success'),
+            warningMessage: req.flash('warning'),
+            errorMessage: req.flash('error'),
+            errors: errors.array(),
+            oldInputs: {
+                email: email,
+                password: password
+            }
+        });
+    }
     User.findOne({ email: email })
         .then(user => {
             if (!user) {
@@ -57,7 +78,14 @@ module.exports.getRegister = (req, res, next) => {
         path: '/register',
         successMessage: req.flash('success'),
         warningMessage: req.flash('warning'),
-        errorMessage: req.flash('error')
+        errorMessage: req.flash('error'),
+        errors: [],
+        oldInputs: {
+            name: "",
+            email: "",
+            password: "",
+            password_confirm: ""
+        }
     });
 }
 
@@ -66,52 +94,58 @@ module.exports.postRegister = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     const password_confirm = req.body.password_confirm;
-    if (password !== password_confirm) {
-        req.flash('warning', "Password Not Matched");
-        return res.redirect('/register');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        console.log("errors: ", errors.array());
+        return res.status(422).render('ejs-templates/auth/register', {
+            pageTitle: "Register",
+            path: '/register',
+            successMessage: req.flash('success'),
+            warningMessage: req.flash('warning'),
+            errorMessage: req.flash('error'),
+            errors: errors.array(),
+            oldInputs: {
+                name: name,
+                email: email,
+                password: password,
+                password_confirm: password_confirm
+            }
+        });
     }
-    User.findOne({ email: email })
-        .then(user => {
-            if (!user) {
-                return bcrypt.hash(password, 12)
-                    .then(hashedPassword => {
-                        return User.create({
-                            name: name,
-                            email: email,
-                            password: hashedPassword,
-                            cart: { items: [] }
-                        })
-                            .then(registeredUser => {
-                                if (!registeredUser) {
-                                    req.flash('error', "Error Occured while registeration process, please try again.");
-                                    return res.redirect('/register');
-                                }
-                                req.session.isLoggedIn = true;
-                                req.session.user = registeredUser;
-                                return req.session.save((err) => {
-                                    req.flash('success', "Welcome " + registeredUser.name + ", you are registered successfully!");
-                                    res.redirect('/');
-                                    return mailTransporter.sendMail({
-                                        to: email,
-                                        from: appKeys.fromEmailAddress,
-                                        subject: "Signup Completed - Welcome " + name,
-                                        html: "<h1>Hi, welcome to this community, we wish you a great journy with us :)"
-                                    }).then(result => {
-                                    }).catch(err => {
-                                        console.log("Signup Email Sending Failed!", err);
-                                    });
-                                });
-                            })
-                            .catch(err => console.log(err));
+    else {
+        bcrypt.hash(password, 12)
+            .then(hashedPassword => {
+                return User.create({
+                    name: name,
+                    email: email,
+                    password: hashedPassword,
+                    cart: { items: [] }
+                })
+                    .then(registeredUser => {
+                        if (!registeredUser) {
+                            req.flash('error', "Error Occured while registeration process, please try again.");
+                            return res.redirect('/register');
+                        }
+                        req.session.isLoggedIn = true;
+                        req.session.user = registeredUser;
+                        return req.session.save((err) => {
+                            req.flash('success', "Welcome " + registeredUser.name + ", you are registered successfully!");
+                            res.redirect('/');
+                            return mailTransporter.sendMail({
+                                to: email,
+                                from: appKeys.fromEmailAddress,
+                                subject: "Signup Completed - Welcome " + name,
+                                html: "<h1>Hi, welcome to this community, we wish you a great journy with us :)"
+                            }).then(result => {
+                            }).catch(err => {
+                                console.log("Signup Email Sending Failed!", err);
+                            });
+                        });
                     })
                     .catch(err => console.log(err));
-            }
-            else {
-                req.flash('error', "User already exists with this email.");
-                return res.redirect('/register');
-            }
-        })
-        .catch(err => console.log(err));
+            })
+            .catch(err => console.log(err));
+    }
 }
 
 module.exports.postLogout = (req, res, next) => {

@@ -1,7 +1,8 @@
 const Product = require('../../models/product');
+const { validationResult } = require('express-validator');
 
 exports.getProducts = (req, res, next) => {
-    Product.find()
+    Product.find({userID: req.user._id})
         .then(products => {
             return res.render('ejs-templates/admin/products', {
                 prods: products,
@@ -22,7 +23,14 @@ exports.getAddProductPage = (req, res, next) => {
         path: '/admin/add-product',
         successMessage: req.flash('success'),
         warningMessage: req.flash('warning'),
-        errorMessage: req.flash('error')
+        errorMessage: req.flash('error'),
+        errors: [],
+        oldInputs: {
+            title: '',
+            image: '',
+            price: '',
+            description: ''
+        }
     });
 };
 
@@ -31,6 +39,23 @@ exports.postStoreProduct = (req, res, next) => {
     const image = req.body.image;
     const price = req.body.price;
     const description = req.body.description;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render('ejs-templates/admin/add-product', {
+            pageTitle: "Add Product",
+            path: '/admin/add-product',
+            successMessage: req.flash('success'),
+            warningMessage: req.flash('warning'),
+            errorMessage: req.flash('error'),
+            errors: errors.array(),
+            oldInputs: {
+                title: title,
+                image: image,
+                price: price,
+                description: description
+            }
+        });
+    }
     const product = new Product({ title: title, description: description, image: image, price: price, userID: req.user });
     product.save()
         .then(result => {
@@ -67,7 +92,14 @@ exports.getEditProductPage = (req, res, next) => {
                 product: product,
                 successMessage: req.flash('success'),
                 warningMessage: req.flash('warning'),
-                errorMessage: req.flash('error')
+                errorMessage: req.flash('error'),
+                errors: [],
+                oldInputs: {
+                    title: '',
+                    image: '',
+                    price: '',
+                    description: ''
+                }
             });
         }).catch(err => {
             console.log(err);
@@ -80,6 +112,23 @@ exports.postUpdateProduct = (req, res, next) => {
     const image = req.body.image;
     const price = req.body.price;
     const description = req.body.description;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render('ejs-templates/admin/edit-product', {
+            pageTitle: "Edit Product",
+            path: '/admin/edit-product',
+            successMessage: req.flash('success'),
+            warningMessage: req.flash('warning'),
+            errorMessage: req.flash('error'),
+            errors: errors.array(),
+            oldInputs: {
+                title: title,
+                image: image,
+                price: price,
+                description: description
+            }
+        });
+    }
     Product.findById(id)
         .then(product => {
             if (product.userID.toString() != req.user._id.toString()) {
