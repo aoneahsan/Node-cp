@@ -2,7 +2,7 @@ const Product = require('../../models/product');
 const { validationResult } = require('express-validator');
 
 exports.getProducts = (req, res, next) => {
-    Product.find({userID: req.user._id})
+    Product.find({ userID: req.user._id })
         .then(products => {
             return res.render('ejs-templates/admin/products', {
                 prods: products,
@@ -13,7 +13,10 @@ exports.getProducts = (req, res, next) => {
                 errorMessage: req.flash('error')
             });
         }).catch(err => {
-            console.log(err);
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while fetching products.";
+            return next(error);
         });
 };
 
@@ -63,8 +66,10 @@ exports.postStoreProduct = (req, res, next) => {
             return res.status(200).redirect('/admin/products');
         })
         .catch(err => {
-            req.flash('error', 'Error Occured while creating Product!');
-            console.log(err)
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while adding new product.";
+            return next(error);
         });
 };
 
@@ -102,7 +107,10 @@ exports.getEditProductPage = (req, res, next) => {
                 }
             });
         }).catch(err => {
-            console.log(err);
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while fetching product data to edit.";
+            return next(error);
         });
 };
 
@@ -145,7 +153,10 @@ exports.postUpdateProduct = (req, res, next) => {
             req.flash('success', 'Product Updated Successfully!');
             return res.status(200).redirect('/admin/products');
         }).catch(err => {
-            console.log(err);
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while updating product data.";
+            return next(error);
         });
 };
 
@@ -161,7 +172,9 @@ exports.deleteProduct = (req, res, next) => {
             return res.status(200).redirect('/admin/products');
         });
     }).catch(err => {
-        req.flash('error', 'Error Occured while deleting Product!');
-        console.log(err);
+        let error = new Error(err);
+        error.httpStatusCode = 500;
+        error.message = "Error while deleting product.";
+        return next(error);
     });
 };

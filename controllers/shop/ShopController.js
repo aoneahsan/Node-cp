@@ -12,9 +12,12 @@ exports.getIndex = (req, res, next) => {
                 warningMessage: req.flash('warning'),
                 errorMessage: req.flash('error')
             });
-        }).catch(err => {
-            req.flash('error', "Error Occured!");
-            console.log(err);
+        })
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while fetching products.";
+            return next(error);
         });
 };
 
@@ -29,9 +32,12 @@ exports.getProducts = (req, res, next) => {
                 warningMessage: req.flash('warning'),
                 errorMessage: req.flash('error')
             });
-        }).catch(err => {
-            req.flash('error', "Error Occured!");
-            console.log(err);
+        })
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while fetching products.";
+            return next(error);
         });
 };
 
@@ -47,8 +53,12 @@ exports.getProductDetail = (req, res, next) => {
                 warningMessage: req.flash('warning'),
                 errorMessage: req.flash('error')
             });
-        }).catch(err => {
-            console.log(err);
+        })
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while fetching product details.";
+            return next(error);
         });
 };
 
@@ -85,8 +95,10 @@ exports.getCart = (req, res, next) => {
             });
         })
         .catch(err => {
-            req.flash('error', "Error Occured!");
-            console.log(err);
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while fetching cart items.";
+            return next(error);
         });
 };
 
@@ -102,7 +114,12 @@ exports.postCart = (req, res, next) => {
                 return res.redirect('/404');
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while adding product in cart.";
+            return next(error);
+        });
 };
 
 exports.removeCartItem = (req, res, next) => {
@@ -116,7 +133,12 @@ exports.removeCartItem = (req, res, next) => {
                 return res.status(400).redirect('/404');
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while removing product from cart.";
+            return next(error);
+        });
 };
 
 exports.getCheckout = (req, res, next) => {
@@ -147,7 +169,12 @@ exports.getOrders = (req, res, next) => {
                 errorMessage: req.flash('error')
             });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while fetching user orders.";
+            return next(error);
+        })
 };
 
 exports.placeOrder = (req, res, next) => {
@@ -178,7 +205,7 @@ exports.placeOrder = (req, res, next) => {
                     return product;
                 });
             }
-            const order = new Order({products: products, orderTotalPrice: cartTotalPrice, user: userData});
+            const order = new Order({ products: products, orderTotalPrice: cartTotalPrice, user: userData });
             return order.save();
         })
         .then(orderPlaced => {
@@ -191,5 +218,10 @@ exports.placeOrder = (req, res, next) => {
             }
             return res.status(200).redirect('/orders');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while placing user order.";
+            return next(error);
+        });
 };

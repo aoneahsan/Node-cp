@@ -59,6 +59,7 @@ expressApp.use(flash());
 // **********************************************************************************
 // adding default user in global request so it can be retrived from anywhere in the app
 expressApp.use((req, res, next) => {
+    res.locals.isLoggedIn = false;
     User.findById(req.session.user).then(user => {
         if (user) {
             // console.log("session user found and set done");
@@ -74,7 +75,10 @@ expressApp.use((req, res, next) => {
             return next();
         }
     }).catch(err => {
-        console.log(err);
+        let error = new Error(err);
+        error.httpStatusCode = 500;
+        error.message = "Error while starting user section.";
+        return next(error);
     });
 });
 
@@ -92,7 +96,19 @@ expressApp.use(bodyParser.urlencoded({ extended: false })); // this will make al
 expressApp.use('/admin', adminRoutes);
 expressApp.use(shopRoutes);
 expressApp.use(authRoutes);
-expressApp.use(systemController.getPageNotFound);
+expressApp.use('/500', systemController.get500);
+expressApp.use(systemController.get404);
+
+expressApp.use((error, req, res, next) => {
+    return res.status(error.httpStatusCode).render('ejs-templates/errors/500', {
+        pageTitle: "500 | Server Side Issue",
+        path: '/500',
+        successMessage: req.flash('success'),
+        warningMessage: req.flash('warning'),
+        errorMessage: req.flash('error'),
+        error: error.message
+    });
+});
 
 // create user after auth module
 mongoose.connect(MONGODB_URI

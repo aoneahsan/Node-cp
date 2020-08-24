@@ -69,7 +69,12 @@ module.exports.postLogin = (req, res, next) => {
                     });
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while logging in.";
+            return next(error);
+        });
 }
 
 module.exports.getRegister = (req, res, next) => {
@@ -142,9 +147,19 @@ module.exports.postRegister = (req, res, next) => {
                             });
                         });
                     })
-                    .catch(err => console.log(err));
+                    .catch(err => {
+                        let error = new Error(err);
+                        error.httpStatusCode = 500;
+                        error.message = "Error while registring user.";
+                        return next(error);
+                    });
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                let error = new Error(err);
+                error.httpStatusCode = 500;
+                error.message = "Error while registring user.";
+                return next(error);
+            });
     }
 }
 
@@ -200,13 +215,19 @@ module.exports.postResetPassword = (req, res, next) => {
                                 req.flash('success', "Password Reset Mail Send, Check your Email!");
                                 return res.redirect('/reset');
                             }).catch(err => {
-                                console.log(err);
-                                req.flash('error', "Something went wrong!");
-                                return res.redirect('/reset');
+                                let error = new Error(err);
+                                error.httpStatusCode = 500;
+                                error.message = "Error while requesting reset password link.";
+                                return next(error);
                             });
                     }
                 })
-                .catch(err => console.log(err))
+                .catch(err => {
+                    let error = new Error(err);
+                    error.httpStatusCode = 500;
+                    error.message = "Error while requesting reset password link.";
+                    return next(error);
+                })
         }
     })
 }
@@ -270,8 +291,17 @@ module.exports.postNewPassword = (req, res, next) => {
                         })
                     }
                 })
-                .catch(err => console.log(err))
-
+                .catch(err => {
+                    let error = new Error(err);
+                    error.httpStatusCode = 500;
+                    error.message = "Error while updating password.";
+                    return next(error);
+                })
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            let error = new Error(err);
+            error.httpStatusCode = 500;
+            error.message = "Error while updating password.";
+            return next(error);
+        })
 }
