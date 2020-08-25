@@ -1,11 +1,11 @@
-<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage,
+warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center mt-5">
     <div class="container">
         <% if(orders.length > 0) { %>
         <div class="list-group">
             <% orders.forEach((order, index) => { %>
-            <a
-                href="#"
+            <li
                 class="list-group-item list-group-item-action flex-column align-items-start text-left"
             >
                 <div class="d-flex w-100 justify-start">
@@ -22,9 +22,14 @@
                         <%= product.quantity %>
                     </li>
                     <% }) %>
-                    <li class="list-group-item bg-dark text-light">Total Price: $<%= order.orderTotalPrice %></li>
+                    <li class="list-group-item bg-dark text-light">
+                        Total Price: $<%= order.orderTotalPrice %>
+                        <a class="btn btn-outline-light btn-sm ml-5" href="/orders/<%= order._id %>/get-invoice">
+                            Get Invoice
+                        </a>
+                    </li>
                 </ul>
-            </a>
+            </li>
             <% }) %>
         </div>
         <% } else { %>

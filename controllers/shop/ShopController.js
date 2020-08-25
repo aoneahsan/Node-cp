@@ -1,3 +1,8 @@
+const fs = require('fs');
+const path = require('path');
+
+const PDFDocument = require('pdfkit');
+
 const Product = require('./../../models/product');
 const Order = require('./../../models/order');
 
@@ -225,3 +230,49 @@ exports.placeOrder = (req, res, next) => {
             return next(error);
         });
 };
+
+exports.getInvoice = (req, res, next) => {
+    const orderID = req.params.orderID;
+    const invoiceName = "invoice-" + orderID + ".pdf";
+    const invoicePath = path.join("data", "invoices", invoiceName);
+    Order.findById(orderID)
+        .then(order => {
+            if (!order) {
+                return next(new Error("No Order Found!"));
+            }
+            else if (order.user.id.toString() !== req.user._id.toString()) {
+                return next(new Error("Not Autherized"));
+            }
+            else {
+                fs.readFile(invoicePath, (err, fileContent) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    else {
+                        const pdfDoc = new PDFDocument();
+                        // setting headers
+                        res.setHeader('Content-Type', 'application/pdf');
+                        res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"');
+                        // writing file on server
+                        pdfDoc.pipe(fs.createWriteStream(invoiceName));
+                        // sending file back in response
+                        pdfDoc.pipe(res);
+                        // writing file it does not metter if you wirte above two line before or after "pdfDoc.end()" these will only execute after you call "pdfDoc.end()".
+                        pdfDoc.fontSize(24).text(`Order # ${orderID}`);
+                        pdfDoc.fontSize(18).text(`No of Products: ${order.products.length}`);
+                        pdfDoc.fontSize(16).text("#---------------------------------------------#");
+                        pdfDoc.fontSize(16).text(`Products List:`);
+                        let orderTotalPrice = 0;
+                        order.products.forEach((prod, index) => {
+                            orderTotalPrice += +prod.price * +prod.quantity;
+                            pdfDoc.text(`#${index+1}  -  Product Title: ${prod.title}  -  Product Qnatity: ${prod.quantity}  -  Product Price: ${prod.price}`);
+                        });
+                        pdfDoc.fontSize(16).text("#---------------------------------------------#");
+                        pdfDoc.fontSize(22).text("Order Total Price: $"+ orderTotalPrice);
+                        pdfDoc.end();
+                    }
+                })
+            }
+        })
+        .catch(err => next(err));
+}

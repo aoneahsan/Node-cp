@@ -78,7 +78,9 @@ module.exports.postLogin = (req, res, next) => {
 }
 
 module.exports.getRegister = (req, res, next) => {
-    res.render('ejs-templates/auth/register', {
+    // console.log("ok");
+    // return;
+    return res.status(200).render('ejs-templates/auth/register', {
         pageTitle: "Register",
         path: '/register',
         successMessage: req.flash('success'),

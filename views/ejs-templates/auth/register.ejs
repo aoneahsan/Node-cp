@@ -31,12 +31,10 @@ warningMessage: warningMessage, errorMessage: errorMessage}) %>
                     id="name"
                     placeholder="Enter Name"
                     value="<%= oldInputs.name %>"
+                    required
                 />
                 <% if(errors.find(e => e.param === 'name')) { %>
-                <span class="small">
-                    <%= errors.find(e => e.param === 'name') ? errors.find(e =>
-                    e.param === 'name').msg : '' %>
-                </span>
+                    <span class="small"><%= errors.find(e => e.param === 'name') ? errors.find(e => e.param === 'name').msg : '' %></span>
                 <% } %>
             </div>
             <div class="form-group">
@@ -46,14 +44,12 @@ warningMessage: warningMessage, errorMessage: errorMessage}) %>
                     class="form-control <%= errors.find(e => e.param === 'email') ? 'border-danger' : '' %>"
                     name="email"
                     id="email"
+                    required
                     placeholder="Enter Email"
                     value="<%= oldInputs.email %>"
                 />
                 <% if(errors.find(e => e.param === 'email')) { %>
-                <span class="small">
-                    <%= errors.find(e => e.param === 'email') ? errors.find(e =>
-                    e.param === 'email').msg : '' %>
-                </span>
+                    <span class="small"><%= errors.find(e => e.param === 'email') ? errors.find(e => e.param === 'email').msg : '' %></span>
                 <% } %>
             </div>
             <div class="form-group">
@@ -63,14 +59,12 @@ warningMessage: warningMessage, errorMessage: errorMessage}) %>
                     class="form-control <%= errors.find(e => e.param === 'password') ? 'border-danger' : '' %>"
                     name="password"
                     id="password"
+                    required
                     placeholder="Enter Password"
                     value="<%= oldInputs.password %>"
                 />
                 <% if(errors.find(e => e.param === 'password')) { %>
-                <span class="small">
-                    <%= errors.find(e => e.param === 'password') ? errors.find(e
-                    => e.param === 'password').msg : '' %>
-                </span>
+                    <span class="small"><%= errors.find(e => e.param === 'password') ? errors.find(e => e.param === 'password').msg : '' %></span>
                 <% } %>
             </div>
             <div class="form-group">
@@ -80,14 +74,12 @@ warningMessage: warningMessage, errorMessage: errorMessage}) %>
                     class="form-control <%= errors.find(e => e.param === 'password_confirm') ? 'border-danger' : '' %>"
                     name="password_confirm"
                     id="password_confirm"
+                    required
                     placeholder="Enter Password Confirm"
                     value="<%= oldInputs.password_confirm %>"
                 />
                 <% if(errors.find(e => e.param === 'password_confirm')) { %>
-                <span class="small">
-                    <%= errors.find(e => e.param === 'password_confirm') ?
-                    errors.find(e => e.param === 'password_confirm').msg : '' %>
-                </span>
+                    <span class="small"><%= errors.find(e => e.param === 'password_confirm') ? errors.find(e => e.param === 'password_confirm').msg : '' %></span>
                 <% } %>
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfTokken %>" />

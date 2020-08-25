@@ -27,4 +27,6 @@ router.get('/orders', authMiddleware, shopController.getOrders);
 
 router.post('/place-order', authMiddleware, shopController.placeOrder);
 
+router.get('/orders/:orderID/get-invoice', authMiddleware, shopController.getInvoice);
+
 module.exports = router;

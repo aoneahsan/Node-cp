@@ -15,6 +15,16 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 // const csrf = require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
+const multerFileStorageConfig = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, 'images'); // this callback is required to continue the request, "first parameter is an error if you want to throw error"
+    },
+    filename: (req, file, callback) => {
+        const random = new Date().toISOString();
+        callback(null, random + '-' + file.originalname);
+    }
+})
 
 // Custom Imports
 // Routes Files
@@ -41,6 +51,7 @@ const expressApp = express();
 // **********************************************************************************
 // including static files (style, scripts, images) files.
 expressApp.use(express.static(path.join(__dirname, 'public')));
+expressApp.use('/images', express.static(path.join(__dirname, 'images')));
 // expressApp.use(express.static(path.join(__dirname, 'data')));
 
 // adding user session object middleware
@@ -90,6 +101,10 @@ expressApp.set('views', 'views');
 // **********************************************************************************
 // this first middleware is from body-parser package it is used to parse all form data automatically
 expressApp.use(bodyParser.urlencoded({ extended: false })); // this will make all simple form fields available in req.body
+expressApp.use(multer({
+    // dest: 'images'
+    storage: multerFileStorageConfig
+}).single('image')); // this is multer package configuration to enable this package and to parse files from "Form" request
 
 // **********************************************************************************
 // Adding app routes
@@ -100,7 +115,11 @@ expressApp.use('/500', systemController.get500);
 expressApp.use(systemController.get404);
 
 expressApp.use((error, req, res, next) => {
-    return res.status(error.httpStatusCode).render('ejs-templates/errors/500', {
+    let statusCode = 200;
+    if (error.httpStatusCode) {
+        statusCode = error.httpStatusCode;
+    }
+    return res.status(statusCode).render('ejs-templates/errors/500', {
         pageTitle: "500 | Server Side Issue",
         path: '/500',
         successMessage: req.flash('success'),
@@ -122,14 +141,3 @@ mongoose.connect(MONGODB_URI
         expressApp.listen(3000);
     })
     .catch(err => console.log("error while connecting mongoDB"));
-
-
-// const MongoClient = require('mongodb').MongoClient;
-// const uri = "mongodb+srv://node_course_DB_user:node_course_DB_user@nodecourseprojectdb.sd1jx.mongodb.net/NodeCourseProjectDB?retryWrites=true&w=majority";
-// const client = new MongoClient(uri, { useNewUrlParser: true });
-// client.connect(err => {
-//     const collection = client.db("test").collection("devices");
-//     // perform actions on the collection object
-//     //   client.close();
-// });
-// expressApp.listen(3000);

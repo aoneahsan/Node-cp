@@ -29,6 +29,7 @@ router.get('/register', unauthMiddleware, authController.getRegister);
 router.post(
     '/register',
     [
+        check('name', "Please User Name is Required").isString().trim().isLength({ min: 0 }),
         check('email', "Please Enter Correct Email")
             .isEmail()
             .trim()
@@ -45,9 +46,9 @@ router.post(
                     })
             }),
         body('password', 'Password should contain only letters and numbers and at least 5 charactors.')
-            .trim()
             .isLength({ min: 5 })
             .isAlphanumeric()
+            .trim()
         ,
         body('password_confirm')
             .trim()
