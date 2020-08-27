@@ -6,8 +6,18 @@ const PDFDocument = require('pdfkit');
 const Product = require('./../../models/product');
 const Order = require('./../../models/order');
 
+const ITEMS_PER_PAGE = 2;
+
 exports.getIndex = (req, res, next) => {
-    Product.find()
+    let pageNo = +req.query.page || 1;
+    let totalItems;
+    Product.find().count()
+        .then(prodsCount => {
+            totalItems = prodsCount;
+            return Product.find()
+                .skip((pageNo - 1) * ITEMS_PER_PAGE)  // let's say on page two then,  2-1 = 1 => 1*2 = 2  || so this will skip first two items 
+                .limit(ITEMS_PER_PAGE);
+        })
         .then(products => {
             return res.render('ejs-templates/shop/index', {
                 prods: products,
@@ -15,7 +25,14 @@ exports.getIndex = (req, res, next) => {
                 path: '/shop',
                 successMessage: req.flash('success'),
                 warningMessage: req.flash('warning'),
-                errorMessage: req.flash('error')
+                errorMessage: req.flash('error'),
+                pageNo: pageNo,
+                totalItems: totalItems,
+                hasNextPage: (ITEMS_PER_PAGE * pageNo) < totalItems,
+                hasPreviousPage: pageNo > 1,
+                nextPage: pageNo + 1,
+                previousPage: pageNo - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
             });
         })
         .catch(err => {
@@ -27,7 +44,15 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-    Product.find()
+    let pageNo = +req.query.page || 1;
+    let totalItems;
+    Product.find().count()
+        .then(prodsCount => {
+            totalItems = prodsCount;
+            return Product.find()
+                .skip((pageNo - 1) * ITEMS_PER_PAGE)  // let's say on page two then,  2-1 = 1 => 1*2 = 2  || so this will skip first two items 
+                .limit(ITEMS_PER_PAGE);
+        })
         .then(products => {
             return res.render('ejs-templates/shop/product-list', {
                 prods: products,
@@ -35,7 +60,14 @@ exports.getProducts = (req, res, next) => {
                 path: '/product-list',
                 successMessage: req.flash('success'),
                 warningMessage: req.flash('warning'),
-                errorMessage: req.flash('error')
+                errorMessage: req.flash('error'),
+                pageNo: pageNo,
+                totalItems: totalItems,
+                hasNextPage: (ITEMS_PER_PAGE * pageNo) < totalItems,
+                hasPreviousPage: pageNo > 1,
+                nextPage: pageNo + 1,
+                previousPage: pageNo - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
             });
         })
         .catch(err => {
@@ -265,10 +297,10 @@ exports.getInvoice = (req, res, next) => {
                         let orderTotalPrice = 0;
                         order.products.forEach((prod, index) => {
                             orderTotalPrice += +prod.price * +prod.quantity;
-                            pdfDoc.text(`#${index+1}  -  Product Title: ${prod.title}  -  Product Qnatity: ${prod.quantity}  -  Product Price: ${prod.price}`);
+                            pdfDoc.text(`#${index + 1}  -  Product Title: ${prod.title}  -  Product Qnatity: ${prod.quantity}  -  Product Price: ${prod.price}`);
                         });
                         pdfDoc.fontSize(16).text("#---------------------------------------------#");
-                        pdfDoc.fontSize(22).text("Order Total Price: $"+ orderTotalPrice);
+                        pdfDoc.fontSize(22).text("Order Total Price: $" + orderTotalPrice);
                         pdfDoc.end();
                     }
                 })

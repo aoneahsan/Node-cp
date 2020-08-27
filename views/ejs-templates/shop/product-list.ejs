@@ -4,6 +4,7 @@
         <% if(prods.length > 0) { %>
         <div class="row">
             <%- include('./../../includes/product-list.ejs') %>
+            <%- include('./../../includes/pagination.ejs', {pageNo: pageNo, totalItems: totalItems,hasNextPage: hasNextPage, hasPreviousPage: hasPreviousPage, nextPage: nextPage, previousPage: previousPage, lastPage: lastPage}) %>
         </div>
         <% } else { %>
         <div class="row">

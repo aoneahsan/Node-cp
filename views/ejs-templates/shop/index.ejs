@@ -1,9 +1,11 @@
-<%- include('./../../includes/header.ejs', {successMessage: successMessage, warningMessage: warningMessage, errorMessage: errorMessage}) %>
+<%- include('./../../includes/header.ejs', {successMessage: successMessage,
+warningMessage: warningMessage, errorMessage: errorMessage}) %>
 <main class="text-center mt-5">
     <div class="container">
         <% if(prods.length > 0) { %>
         <div class="row">
             <%- include('./../../includes/product-list.ejs') %>
+            <%- include('./../../includes/pagination.ejs', {pageNo: pageNo, totalItems: totalItems,hasNextPage: hasNextPage, hasPreviousPage: hasPreviousPage, nextPage: nextPage, previousPage: previousPage, lastPage: lastPage}) %>
         </div>
         <% } else { %>
         <div class="row">

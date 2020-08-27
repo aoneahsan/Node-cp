@@ -18,6 +18,6 @@ router.get('/edit-product/:productID', authMiddleware, adminController.getEditPr
 
 router.post('/edit-product', authMiddleware, adminController.postUpdateProduct);
 
-router.post('/delete-product', authMiddleware, adminController.deleteProduct);
+router.delete('/product/:productID', authMiddleware, adminController.deleteProduct);
 
 module.exports = router;

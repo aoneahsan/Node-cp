@@ -140,21 +140,30 @@ exports.postUpdateProduct = (req, res, next) => {
 };
 
 exports.deleteProduct = (req, res, next) => {
-    const id = req.body.productID;
+    const id = req.params.productID;
+
     Product.findById(id).then(product => {
         if (product.userID.toString() != req.user._id.toString()) {
-            req.flash('error', "Don't have correct permission!");
-            return res.redirect('/');
+            // req.flash('error', "Don't have correct permission!");
+            // return res.redirect('/');
+            return res.status(403).json({ message: "Don't have correct permission!", status: 403 });
         }
         fileHelpers.deleteFile(product.image);
         return product.delete((err) => {
-            req.flash('success', 'Product Deleted Successfully!');
-            return res.status(200).redirect('/admin/products');
+            if (err) {
+                return res.status(500).json({ message: "Error Occured while deleting product!", status: 500 });
+            }
+            else {
+                // req.flash('success', 'Product Deleted Successfully!');
+                // return res.status(200).redirect('/admin/products');
+                return res.status(200).json({ message: "Product Deleted Successfully!", status: 200 });
+            }
         });
     }).catch(err => {
-        let error = new Error(err);
-        error.httpStatusCode = 500;
-        error.message = "Error while deleting product.";
-        return next(error);
+        // let error = new Error(err);
+        // error.httpStatusCode = 500;
+        // error.message = "Error while deleting product.";
+        // return next(error);
+        return res.status(500).json({ message: "Server Error Occured!", status: 500 });
     });
 };
