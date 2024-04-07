@@ -108,6 +108,10 @@ const createCodes = (
       fileName: 'full-stack-development-course-12month',
       url: 'https://zaions.com/fsdc12m'
     },
+    {
+      fileName: 'full-stack-development-course-12month',
+      url: 'https://zaions.com/fsdc12m'
+    },
   ]
 ) => {
   for (let i = 0; i < codes.length; i++) {
